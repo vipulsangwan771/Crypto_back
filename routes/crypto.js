@@ -91,14 +91,15 @@ router.get(
     }
 
     try {
-      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const range = req.query.range === '5d' ? 5 : 1; // Default to 1 day
+      const daysAgo = new Date(Date.now() - range * 24 * 60 * 60 * 1000);
 
       const historicalData = await HistoricalCrypto.find({
         coinId: req.params.coinId,
-        timestamp: { $gte: sevenDaysAgo },
+        timestamp: { $gte: daysAgo },
       })
         .select('open high low close timestamp')
-        .sort({ timestamp: 1 }) // ascending for chart
+        .sort({ timestamp: 1 }) // Ascending for chart
         .lean();
 
       if (!historicalData.length) {
@@ -128,6 +129,5 @@ router.get(
     }
   }
 );
-
 
 module.exports = router;

@@ -12,6 +12,8 @@ const app = express();
 // Security Middleware
 app.use(helmet());
 const FRONTEND_URL = 'https://crypto-front-8l8t.onrender.com';
+// const FRONTEND_URL = 'http://localhost:3000';
+
 app.use(cors({ origin: FRONTEND_URL || 'https://crypto-front-8l8t.onrender.com' }));
 app.use(express.json());
 
