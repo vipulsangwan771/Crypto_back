@@ -15,7 +15,7 @@ const fetchCryptoData = async (retries = 3, baseDelay = 30000) => {
           params: {
             vs_currency: 'usd',
             order: 'market_cap_desc',
-            per_page: 10,
+            per_page: 1,
             page: 1,
             sparkline: false,
             price_change_percentage: '24h',
