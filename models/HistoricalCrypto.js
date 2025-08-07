@@ -12,6 +12,6 @@ const HistoricalCryptoSchema = new mongoose.Schema({
   timestamp: { type: Date, required: true, default: Date.now },
 });
 
-HistoricalCryptoSchema.index({ coinId: 1, timestamp: -1 });
+HistoricalCryptoSchema.index({ coinId: 1, timestamp: 1 });
 
 module.exports = mongoose.model('HistoricalCrypto', HistoricalCryptoSchema);

@@ -3,9 +3,8 @@ const axios = require('axios');
 const Crypto = require('../models/Crypto');
 const HistoricalCrypto = require('../models/HistoricalCrypto');
 
-// Simple in-memory cache (use Redis in production)
 const cache = {};
-const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes in ms
+const CACHE_DURATION = 30 * 60 * 1000; 
 
 const fetchCryptoData = async (retries = 3, baseDelay = 60000, days = 3) => {
   let lastError = null;

@@ -6,6 +6,10 @@ const HistoricalCrypto = require('../models/HistoricalCrypto');
 const auth = require('../middleware/auth');
 const { fetchCryptoData } = require('../jobs/cryptoJob');
 
+// In-memory cache for chart data
+const cache = {};
+const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes in ms
+
 router.get(
   '/',
   [
@@ -20,6 +24,14 @@ router.get(
 
     try {
       const search = req.query.search || '';
+      const cacheKey = `crypto_list_${search}`;
+      const cachedData = cache[cacheKey];
+
+      if (cachedData && Date.now() - cachedData.timestamp < CACHE_DURATION) {
+        console.log(`Using cached data for crypto list, search: ${search}`);
+        return res.json({ data: cachedData.data });
+      }
+
       const query = search
         ? {
             $or: [
@@ -42,9 +54,11 @@ router.get(
           .sort({ marketCap: -1 })
           .limit(10)
           .lean();
+        cache[cacheKey] = { timestamp: Date.now(), data: newCryptos };
         return res.json({ data: newCryptos });
       }
 
+      cache[cacheKey] = { timestamp: Date.now(), data: cryptos };
       res.json({ data: cryptos });
     } catch (error) {
       console.error('Error fetching cryptos:', error);
@@ -91,7 +105,16 @@ router.get(
     }
 
     try {
-      const range = req.query.range === '5d' ? 5 : 1; // Default to 1 day
+      const range = req.query.range === '3d' ? 3 : 1; // Default to 1 day
+      const cacheKey = `${req.params.coinId}_chart_${range}d`;
+      const cachedData = cache[cacheKey];
+
+      // Check cache
+      if (cachedData && Date.now() - cachedData.timestamp < CACHE_DURATION) {
+        console.log(`Using cached chart data for ${req.params.coinId}, range: ${range}d`);
+        return res.json(cachedData.data);
+      }
+
       const daysAgo = new Date(Date.now() - range * 24 * 60 * 60 * 1000);
 
       const historicalData = await HistoricalCrypto.find({
@@ -120,6 +143,12 @@ router.get(
             })),
           },
         ],
+      };
+
+      // Cache the data
+      cache[cacheKey] = {
+        timestamp: Date.now(),
+        data: chartData,
       };
 
       res.json(chartData);

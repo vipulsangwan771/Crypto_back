@@ -11,19 +11,34 @@ const app = express();
 
 // Security Middleware
 app.use(helmet());
-const FRONTEND_URL = 'https://crypto-front-8l8t.onrender.com';
-// const FRONTEND_URL = 'http://localhost:3000';
-
-app.use(cors({ origin: FRONTEND_URL || 'https://crypto-front-8l8t.onrender.com' }));
+const CONST_FRONTEND_URL = 'https://crypto-front-8l8t.onrender.com';
+// const CONST_FRONTEND_URL = 'http://localhost:3000';
+const FRONTEND_URL = CONST_FRONTEND_URL || 'https://crypto-front-8l8t.onrender.com';
+app.use(cors({ origin: FRONTEND_URL }));
 app.use(express.json());
 
-// Rate Limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,
-  message: { error: 'Too many requests, please try again later.' }
+// Request Logging
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
 });
-app.use(limiter);
+
+// Route-specific rate limiting for /chart
+const chartLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 50, // 50 requests per IP
+  message: { error: 'Too many chart requests, please try again later.' },
+});
+
+// Global rate limiting
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { error: 'Too many requests, please try again later.' },
+});
+
+app.use(globalLimiter);
+app.use('/api/crypto/chart', chartLimiter);
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
@@ -45,8 +60,8 @@ mongoose.connect(process.env.MONGODB_URI)
 // Routes
 app.use('/api/crypto', cryptoRoutes);
 app.get('/', (req, res) => {
-  res.send('Server is running');
-})
+  res.send('Crypto API Server is running');
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
