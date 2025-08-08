@@ -85,6 +85,18 @@ The server uses **node-cron** to fetch and store data every 30 minutes:
 
 ---
 
+## 📸 Cron Job Setup
+
+Below is a screenshot of the `node-cron` job that runs every 30 minutes to fetch and store cryptocurrency data.
+
+![Cron Job Code](./assets/crn.png)
+
+Here’s a sample log output showing the cron job running successfully:
+
+![Cron Job Logs](./assets/logs.png)
+
+---
+
 ## Project Structure
 
 ```
