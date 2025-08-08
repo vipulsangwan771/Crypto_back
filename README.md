@@ -67,7 +67,7 @@ This is the **backend server** for the Crypto Tracker application. It is built u
   Returns the 60 most recent historical records (OHLC) for a coin.
 
 - **GET /api/crypto/chart/:coinId**  
-  Returns 7-day chart data for a given coin in candlestick format.
+  Returns 3-day chart data for a given coin in candlestick format.
 
 ---
 
@@ -84,6 +84,34 @@ The server uses **node-cron** to fetch and store data every 30 minutes:
   - `HistoricalCrypto` collection (timestamped historical records)
 
 ---
+## How the Cron Job Works
+
+
+The backend uses **node-cron** to automate cryptocurrency data fetching every **30 minutes**.  
+This ensures that the database always contains fresh market data and recent historical records without manual intervention.
+
+**Workflow**:
+
+1. **Trigger** – Every 30 minutes, `node-cron` executes the `cryptoJob.js` script.
+2. **Fetch Data** –  
+   - Calls the **CoinGecko API** to get:
+     - **Top 10 cryptocurrencies** sorted by market cap (current price, market cap, 24h change).
+     - **7-day OHLC (Open, High, Low, Close)** data for each coin.
+3. **Store Data** –  
+   - Saves **latest snapshot** in the `Crypto` collection (overwrites old data).
+   - Appends **historical records** to the `HistoricalCrypto` collection with timestamps for tracking price trends over time.
+4. **Error Handling** –  
+   - If the API call fails, logs the error without crashing the server.
+   - Retries automatically on the next scheduled run.
+5. **Usage in API** –  
+   - `GET /api/crypto` reads from the `Crypto` collection.
+   - `GET /api/crypto/historical/:coinId` reads from the `HistoricalCrypto` collection.
+
+**Schedule Expression**:  
+```javascript
+cron.schedule("*/30 * * * *", cryptoJob);
+```
+
 
 ## 📸 Cron Job Setup
 
@@ -119,7 +147,7 @@ Crypto_back/
 ## Deployment
 
 - **Backend**: Render  
-  API Base URL: _[Add your Render URL]_  
+  API Base URL: _(https://crypto-back-nmg4.onrender.com)_  
 - **Database**: MongoDB Atlas  
 - **Collections**:
   - `Crypto` – Latest market data  
