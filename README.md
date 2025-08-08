@@ -67,7 +67,7 @@ This is the **backend server** for the Crypto Tracker application. It is built u
   Returns the 60 most recent historical records (OHLC) for a coin.
 
 - **GET /api/crypto/chart/:coinId**  
-  Returns 7-day chart data for a given coin in candlestick format.
+  Returns 3-day chart data for a given coin in candlestick format.
 
 ---
 
@@ -107,7 +107,7 @@ Crypto_back/
 ## Deployment
 
 - **Backend**: Render  
-  API Base URL: _[Add your Render URL]_  
+  API Base URL: _(https://crypto-back-nmg4.onrender.com)_  
 - **Database**: MongoDB Atlas  
 - **Collections**:
   - `Crypto` – Latest market data  
